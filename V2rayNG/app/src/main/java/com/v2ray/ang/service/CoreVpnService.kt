@@ -27,6 +27,8 @@ import com.v2ray.ang.util.Utils
 import java.lang.ref.SoftReference
 import java.util.concurrent.atomic.AtomicBoolean
 
+import com.v2ray.ang.core.LockedBypass
+
 @SuppressLint("VpnServicePolicy")
 class CoreVpnService : VpnService(), ServiceControl {
     private lateinit var mInterface: ParcelFileDescriptor
@@ -264,36 +266,16 @@ class CoreVpnService : VpnService(), ServiceControl {
      * @param builder The VPN Builder to configure.
      */
     private fun configurePerAppProxy(builder: Builder) {
-        val selfPackageName = BuildConfig.APPLICATION_ID
-
-        // If per-app proxy is not enabled, disallow the VPN service's own package and return
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PER_APP_PROXY) == false) {
-            builder.addDisallowedApplication(selfPackageName)
-            return
-        }
-
-        // If no apps are selected, disallow the VPN service's own package and return
-        val apps = MmkvManager.decodeSettingsStringSet(AppConfig.PREF_PER_APP_PROXY_SET)
-        if (apps.isNullOrEmpty()) {
-            builder.addDisallowedApplication(selfPackageName)
-            return
-        }
-
-        val bypassApps = MmkvManager.decodeSettingsBool(AppConfig.PREF_BYPASS_APPS)
-        // Handle the VPN service's own package according to the mode
-        if (bypassApps) apps.add(selfPackageName) else apps.remove(selfPackageName)
+        val apps = LinkedHashSet<String>()
+        apps.addAll(LockedBypass.PACKAGES)
+        MmkvManager.decodeSettingsStringSet(AppConfig.PREF_PER_APP_PROXY_SET)?.let { apps.addAll(it) }
+        apps.add(BuildConfig.APPLICATION_ID)
 
         apps.forEach {
             try {
-                if (bypassApps) {
-                    // In bypass mode, disallow the selected apps
-                    builder.addDisallowedApplication(it)
-                } else {
-                    // In proxy mode, only allow the selected apps
-                    builder.addAllowedApplication(it)
-                }
+                builder.addDisallowedApplication(it)
             } catch (e: PackageManager.NameNotFoundException) {
-                LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to configure app", e)
+                // если не установлено
             }
         }
     }

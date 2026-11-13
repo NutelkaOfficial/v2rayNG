@@ -793,6 +793,11 @@ object MmkvManager {
         return JsonUtil.fromJsonSafe(ruleset, Array<RulesetItem>::class.java)?.toMutableList() ?: mutableListOf()
     }
 
+    fun decodeEffectiveRoutingRulesets(): MutableList<RulesetItem>? {
+        val user = decodeRoutingRulesets() ?: mutableListOf()
+        return (com.v2ray.ang.core.LockedBypass.rulesets() + user).toMutableList()
+    }
+
     /**
      * Encodes the routing rulesets.
      *

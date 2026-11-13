@@ -598,7 +598,7 @@ object CoreConfigManager {
     private fun collectUserRuleDomainsByTag(tag: String): ArrayList<String> {
         val domain = ArrayList<String>()
 
-        val rulesetItems = MmkvManager.decodeRoutingRulesets()
+        val rulesetItems = MmkvManager.decodeEffectiveRoutingRulesets()
         rulesetItems?.forEach { key ->
             if (key.enabled && key.outboundTag == tag && !key.domain.isNullOrEmpty()) {
                 key.domain?.forEach {
@@ -616,7 +616,7 @@ object CoreConfigManager {
     private fun collectCustomOutboundDomains(): ArrayList<String> {
         val domain = ArrayList<String>()
 
-        val rulesetItems = MmkvManager.decodeRoutingRulesets()
+        val rulesetItems = MmkvManager.decodeEffectiveRoutingRulesets()
         rulesetItems?.forEach { key ->
             if (key.enabled && !AppConfig.BUILTIN_OUTBOUND_TAGS.contains(key.outboundTag)
                 && !key.domain.isNullOrEmpty()
@@ -1184,11 +1184,11 @@ object CoreConfigManager {
         policyGroupBalancerTags: Map<String, String>
     ) {
 
-        v2rayConfig.routing.domainStrategy =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY)
-                ?: "AsIs"
+        val userStrategy = MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY) ?: "AsIs"
+            //geoip:ru олжен срабатывать и на домены
+            v2rayConfig.routing.domainStrategy = if (userStrategy == "AsIs") "IPIfNonMatch" else userStrategy   
 
-        val rulesetItems = MmkvManager.decodeRoutingRulesets()
+        val rulesetItems = MmkvManager.decodeEffectiveRoutingRulesets()
         rulesetItems?.forEach { key ->
             appendRoutingUserRule(configContext, key, v2rayConfig, policyGroupBalancerTags)
         }
