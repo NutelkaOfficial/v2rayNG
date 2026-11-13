@@ -24,6 +24,8 @@ object LockedBypass {
         "ru.instamart", "ru.dublgis.dgismobile", "ru.hh.android", "ru.cian.main",
         // Операторы
         "ru.mts.mymts", "ru.beeline.services", "ru.megafon.mlk", "ru.tele2.mytele2",
+        // Тестовый блок
+        "org.zwanoo.android.speedtest",
     )
 
     private val DOMAINS = arrayListOf(
