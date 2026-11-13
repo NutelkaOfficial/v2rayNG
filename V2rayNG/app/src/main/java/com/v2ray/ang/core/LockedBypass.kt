@@ -208,13 +208,12 @@ object LockedBypass {
 
     private val DOMAINS = arrayListOf(
         "geosite:category-ru", "geosite:category-gov-ru", "geosite:yandex", "geosite:vk", "geosite:mailru", "geosite:ozon",
-        "ext:ru-geosite.dat:category-ru-whitelist","ext:ru-geosite.dat:ru-whitelist-extended",
         "domain:ru", "domain:su", "domain:xn--p1ai", // .рф
         "domain:vk.com", "domain:vk-cdn.net", "domain:userapi.com", "domain:mycdn.me",
         "domain:yandex.com", "domain:yandex.net", "domain:yastatic.net", "domain:sberbank.com",
     )
 
-    private val IPS = arrayListOf("geoip:ru", "ext:ru-geoip.dat:ru")
+    private val IPS = arrayListOf("geoip:ru")
 
     fun rulesets(): List<RulesetItem> = listOf(
         RulesetItem(id = "locked-ru-domains", remarks = "Locked: Russia domains",
